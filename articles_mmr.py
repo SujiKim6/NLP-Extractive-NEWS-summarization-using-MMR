@@ -45,7 +45,7 @@ def processArticles(article):
 
     return sentences
 
-def summaryArticles(sentences, _id, yes, no, multiple):
+def summaryArticles(sentences, _id, yes, no, multiple, folder):
     IDF_w = mmr.IDFs(sentences)
     TF_IDF_w = mmr.TF_IDF(sentences)
     query = mmr.buildQuery(sentences, TF_IDF_w, 10)
@@ -58,13 +58,14 @@ def summaryArticles(sentences, _id, yes, no, multiple):
     for sent in summary:
         final_summary = final_summary + sent.getOriginalWords() + "\n"
     final_summary = final_summary[:-1]
-
-    folder_name = "/yesno_results" if not multiple else "/multi_results"
+    
+    folder_name = folder
+    folder_name += "/yesno_results" if not multiple else "/multi_results"
     file_name = _id
     if yes: file_name += "_yes"
     elif no: file_name += "_no"
 
-    results_folder = os.path.dirname(os.getcwd()) + folder_name
+    results_folder = os.path.dirname(os.getcwd())+ "/" + folder_name
 
     if not os.path.exists(results_folder):
         os.makedirs(results_folder)
@@ -73,38 +74,44 @@ def summaryArticles(sentences, _id, yes, no, multiple):
         fileOut.write(final_summary)
 
 if __name__ == "__main__":
-    fileName = sys.argv[1]
+    # fileName = sys.argv[1]
+    main_folder_path = os.path.dirname(os.getcwd()) + "/articles/"
 
-    with open(fileName, mode="r") as f:
-        QA_dict = json.load(f)
+    for fileName in os.listdir(main_folder_path):
+        folder = "test_articles" if fileName.find("test") > 0 else "train_articles"
 
-    yesno_questions = QA_dict['yesno_questions']
-    multichoice_questions = QA_dict['multichoice_questions']
+        fileName = main_folder_path + fileName
 
-    for each_yesno in yesno_questions:
-        question_id = each_yesno['id']
+        with open(fileName, mode="r") as f:
+            QA_dict = json.load(f)
 
-        # Summary Yes articles
-        yes_articles = each_yesno['yes_question_articles']
-        yes_sentences = []
-        for each_yes in yes_articles:
-            yes_sentences = yes_sentences + processArticles(each_yes['content'])
+        yesno_questions = QA_dict['yesno_questions']
+        multichoice_questions = QA_dict['multichoice_questions']
 
-        summaryArticles(yes_sentences, question_id, True, False, False)
+        for each_yesno in yesno_questions:
+            question_id = each_yesno['id']
 
-        # Summary No articles
-        no_articles = each_yesno['no_question_articles']
-        no_sentences = []
-        for each_no in no_articles:
-            no_sentences = no_sentences + processArticles(each_no['content'])
-        summaryArticles(no_sentences, question_id, False, True, False)
+            # Summary Yes articles
+            yes_articles = each_yesno['yes_question_articles']
+            yes_sentences = []
+            for each_yes in yes_articles:
+                yes_sentences = yes_sentences + processArticles(each_yes['content'])
 
-    for each_multi in multichoice_questions:
-        question_id = each_multi['id']
+            summaryArticles(yes_sentences, question_id, True, False, False, folder)
 
-        articles = each_multi['question_articles']
-        sentences = []
-        for each_art in articles:
-            sentences = sentences + processArticles(each_art['content'])
+            # Summary No articles
+            no_articles = each_yesno['no_question_articles']
+            no_sentences = []
+            for each_no in no_articles:
+                no_sentences = no_sentences + processArticles(each_no['content'])
+            summaryArticles(no_sentences, question_id, False, True, False, folder)
 
-        summaryArticles(sentences, question_id, False, False, True)
+        for each_multi in multichoice_questions:
+            question_id = each_multi['id']
+
+            articles = each_multi['question_articles']
+            sentences = []
+            for each_art in articles:
+                sentences = sentences + processArticles(each_art['content'])
+
+            summaryArticles(sentences, question_id, False, False, True, folder)
