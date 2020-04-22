@@ -55,11 +55,11 @@ def processFile(file_name):
 		# stemming words
 		stemmedSent = [porter.stem(word) for word in sent]		
 		stemmedSent = filter(lambda x: x!='.'and x!='`'and x!=','and x!='?'and x!="'" 
-			and x!='!' and x!='''"''' and x!="''" and x!="'s", stemmedSent)
+			and x!='!' and x!='''"''' and x!="''" and x!="'s", stemmedSent)	
 		
 		# list of sentence objects
 		if stemmedSent != []:
-			sentences.append(sentence.sentence(file_name, stemmedSent, originalWords))				
+			sentences.append(sentence.sentence(file_name, list(stemmedSent), originalWords))				
 	
 	return sentences
 
@@ -82,10 +82,10 @@ def TFs(sentences):
 	    for word in wordFreqs.keys():
 	    	# if word already present in the dictonary
 	        if tfs.get(word, 0) != 0:				
-				tfs[word] = tfs[word] + wordFreqs[word]
+	            tfs[word] = tfs[word] + wordFreqs[word]
 	        # else if word is being added for the first time
 	        else:				
-				tfs[word] = wordFreqs[word]	
+	            tfs[word] = wordFreqs[word]	
 	return tfs
 
 #---------------------------------------------------------------------------------
@@ -106,7 +106,6 @@ def IDFs(sentences):
         
         # every word in a sentence
         for word in sent.getPreProWords():
-
             # not to calculate a word's IDF value more than once
             if sent.getWordFreq().get(word, 0) != 0:
                 words[word] = words.get(word, 0)+ 1
@@ -184,7 +183,7 @@ def sentenceSim(sentence1, sentence2, IDF_w):
 #---------------------------------------------------------------------------------
 def buildQuery(sentences, TF_IDF_w, n):
 	#sort in descending order of TF-IDF values
-	scores = TF_IDF_w.keys()
+	scores = list(TF_IDF_w.keys())
 	scores.sort(reverse=True)	
 	
 	i = 0
@@ -249,7 +248,7 @@ def makeSummary(sentences, best_sentence, query, summary_length, lambta, IDF):
 			MMRval[sent] = MMRScore(sent, query, summary, lambta, IDF)
 		
 		maxxer = max(MMRval, key=MMRval.get)
-	 	summary.append(maxxer)
+		summary.append(maxxer)
 		sentences.remove(maxxer)
 		sum_len += len(maxxer.getPreProWords())	
 
@@ -277,7 +276,7 @@ def MMRScore(Si, query, Sj, lambta, IDF):
 	r_expr = (1-lambta) * max(value)
 	MMR_SCORE = l_expr - r_expr	
 
-	return MMRScore
+	return MMR_SCORE
 
 # -------------------------------------------------------------
 #	MAIN FUNCTION
@@ -290,7 +289,7 @@ if __name__=='__main__':
 	# read in all the subfolder names present in the main folder
 	for folder in os.listdir(main_folder_path):
 		
-		print "Running MMR Summarizer for files in folder: ", folder 
+		print("Running MMR Summarizer for files in folder: ", folder )
 		# for each folder run the MMR summarizer and generate the final summary
 		curr_folder = main_folder_path + "/" + folder		
 
