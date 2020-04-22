@@ -70,8 +70,11 @@ def summaryArticles(sentences, _id, yes, no, multiple, folder):
     if not os.path.exists(results_folder):
         os.makedirs(results_folder)
 
-    with open(os.path.join(results_folder,(file_name + ".txt")),"w") as fileOut: 
+    open_file_name = os.path.join(results_folder,(file_name + ".txt"))
+    with open(open_file_name,"w") as fileOut: 
         fileOut.write(final_summary)
+    
+    print("DONE: {}".format(open_file_name))
 
 if __name__ == "__main__":
     # fileName = sys.argv[1]
