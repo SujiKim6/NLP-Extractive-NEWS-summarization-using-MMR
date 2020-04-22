@@ -139,8 +139,8 @@ if __name__ == "__main__":
         results_folder = os.path.dirname(os.getcwd())+ "/"
         open_file_name = os.path.join(results_folder, result_fileName)
 
-        json = json.dumps(QA_dict)
+        result = json.dumps(QA_dict)
         with open(open_file_name, "w") as f:
-            f.write(json)
+            f.write(result)
 
         print("DONE: {}".format(open_file_name))
